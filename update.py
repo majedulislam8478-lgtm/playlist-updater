@@ -1,22 +1,15 @@
-
-from datetime import timezone, timedelta
+import json
 import logging
-import os
-import tempfile
-from urllib.parse import urljoin, urlparse
-
+import re
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
-OUTPUT_FILE = "playlist.m3u8"
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+log = logging.getLogger("playlist_json")
+
 BASE_URL = "https://pogo.pk/"
-BD_TZ = timezone(timedelta(hours=6))
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
-log = logging.getLogger("playlist")
+OUTPUT_JSON = "channels.json"
 
 HEADERS = {
     "User-Agent": (
@@ -27,161 +20,107 @@ HEADERS = {
     "Referer": BASE_URL,
 }
 
-SESSION = requests.Session()
-SESSION.headers.update(HEADERS)
+session = requests.Session()
+session.headers.update(HEADERS)
 
 
-def fetch_pogo_matches():
-    """Fetch publicly accessible match links from Pogo.pk."""
+def fetch_event_pages():
+    """Homepage theke protiti event-er link ebong name khunje ber kore."""
     try:
-        response = SESSION.get(BASE_URL, timeout=20)
-        response.raise_for_status()
-    except requests.RequestException as exc:
-        log.error("Failed to fetch Pogo.pk: %s", exc)
+        res = session.get(BASE_URL, timeout=15)
+        res.raise_for_status()
+    except Exception as exc:
+        log.error("Failed to fetch homepage: %s", exc)
         return []
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    channels = []
-    seen_urls = set()
+    soup = BeautifulSoup(res.text, "html.parser")
+    events = []
 
-    selectors = [
-        "a[href*='stream']",
-        "a[href*='match']",
-        "a[href*='live']",
-        ".match-item a[href]",
-        ".card a[href]",
-    ]
-
-    links = []
-    for selector in selectors:
-        links.extend(soup.select(selector))
-
-    for item in links:
-        href = (item.get("href") or "").strip()
-        name = item.get_text(" ", strip=True)
+    # Match/Event links selector
+    for a in soup.select("a[href*='/events/'], .match-item a[href], .card a[href]"):
+        href = a.get("href")
+        name = a.get_text(" ", strip=True)
 
         if not href or not name:
             continue
 
         full_url = urljoin(BASE_URL, href)
-        parsed = urlparse(full_url)
+        if not any(e["url"] == full_url for e in events):
+            events.append({
+                "name": name[:100],
+                "url": full_url
+            })
 
-        if parsed.scheme not in ("http", "https"):
-            continue
-
-        # Only accept links hosted on the expected website.
-        if parsed.hostname not in ("pogo.pk", "www.pogo.pk"):
-            continue
-
-        if full_url in seen_urls:
-            continue
-
-        seen_urls.add(full_url)
-
-        channels.append({
-            "name": name[:100],
-            "url": full_url,
-            "group": "Pogo Live",
-            "headers": {
-                "referer": BASE_URL,
-                "user-agent": HEADERS["User-Agent"],
-            },
-        })
-
-    log.info("Found %d candidate links on Pogo.pk", len(channels))
-    return channels
+    log.info("Found %d events on homepage", len(events))
+    return events
 
 
-def build_entry(channel):
-    name = str(channel.get("name", "")).strip()
-    url = str(channel.get("url", "")).strip()
-    group = str(channel.get("group", "Pogo Live")).strip()
-
-    if not name or not url:
-        return None
-
-    parsed = urlparse(url)
-    if parsed.scheme not in ("http", "https") or not parsed.netloc:
-        log.warning("Skipping invalid URL: %s", url)
-        return None
-
-    # Prevent malformed M3U metadata.
-    name = name.replace("\r", " ").replace("\n", " ").replace(",", " ")
-    group = group.replace('"', "").replace("\r", " ").replace("\n", " ")
-
-    headers = {
-        str(key).lower(): str(value)
-        for key, value in (channel.get("headers") or {}).items()
-    }
-
-    lines = [f'#EXTINF:-1 group-title="{group}",{name}']
-
-    if headers.get("referer"):
-        referer = headers["referer"].replace("\r", "").replace("\n", "")
-        lines.append(f"#EXTVLCOPT:http-referrer={referer}")
-
-    if headers.get("user-agent"):
-        user_agent = headers["user-agent"].replace("\r", "").replace("\n", "")
-        lines.append(f"#EXTVLCOPT:http-user-agent={user_agent}")
-
-    lines.append(url)
-    return "\n".join(lines)
-
-
-def write_atomic(path, content):
-    """Write the playlist atomically to avoid partial files."""
-    directory = os.path.dirname(os.path.abspath(path))
-
-    fd, temp_path = tempfile.mkstemp(
-        dir=directory,
-        prefix=".playlist_",
-        suffix=".tmp",
-    )
-
+def extract_stream_info(event_url):
+    """Event page theke player page-e giye direct m3u8 ebong referer extract kore."""
     try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as file:
-            file.write(content)
+        res = session.get(event_url, timeout=15)
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        os.replace(temp_path, path)
+        # Player ba stream iframe/link khunja
+        player_links = []
+        for tag in soup.select("a[href*='player'], a[href*='stream'], iframe[src]"):
+            link = tag.get("href") or tag.get("src")
+            if link:
+                player_links.append(urljoin(event_url, link))
 
-    except Exception:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-        raise
+        for player_url in player_links:
+            # Player page fetch kora
+            player_res = session.get(player_url, headers={"Referer": event_url}, timeout=15)
+            player_html = player_res.text
+
+            # Regex diye m3u8 URL khunja
+            m3u8_match = re.search(r'(https?://[^\s\'"]+\.m3u8[^\s\'"]*)', player_html)
+
+            if m3u8_match:
+                m3u8_url = m3u8_match.group(1).replace("\\", "")
+                referer = player_url
+                return m3u8_url, referer
+
+    except Exception as exc:
+        log.warning("Error parsing stream from %s: %s", event_url, exc)
+
+    return None, None
 
 
 def main():
-    channels = fetch_pogo_matches()
+    events = fetch_event_pages()
+    json_data = []
 
-    if not channels:
-        log.error(
-            "No match links found. Existing playlist will not be overwritten."
-        )
-        return
+    for event in events:
+        log.info("Processing event: %s", event["name"])
+        m3u8_url, referer = extract_stream_info(event["url"])
 
-    entries = []
-    for channel in channels:
-        entry = build_entry(channel)
-        if entry:
-            entries.append(entry)
+        # M3U8 paowa gele JSON-e add hobe, na paowa gele fallback hisebe event URL thakbe
+        stream_url = m3u8_url if m3u8_url else event["url"]
+        headers_dict = {}
 
-    if not entries:
-        log.error("No valid playlist entries generated.")
-        return
+        if referer:
+            headers_dict["Referer"] = referer
+        else:
+            headers_dict["Referer"] = event["url"]
 
-    content = "#EXTM3U\n" + "\n".join(entries) + "\n"
+        headers_dict["User-Agent"] = HEADERS["User-Agent"]
 
-    try:
-        write_atomic(OUTPUT_FILE, content)
-    except OSError as exc:
-        log.error("Failed to write playlist: %s", exc)
-        raise
+        item = {
+            "name": event["name"],
+            "group": "Pogo Live Sports",
+            "url": stream_url,
+            "start_time": "",  # Proyojon onujayi website theke time format Parse kore boshano jabe
+            "headers": headers_dict
+        }
 
-    log.info(
-        "Playlist generated successfully with %d entries: %s",
-        len(entries),
-        OUTPUT_FILE,
-    )
+        json_data.append(item)
+
+    # JSON File-e save kora
+    with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
+        json.dump(json_data, f, indent=2, ensure_ascii=False)
+
+    log.info("Successfully generated %s with %d entries.", OUTPUT_JSON, len(json_data))
 
 
 if __name__ == "__main__":
