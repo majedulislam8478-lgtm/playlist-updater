@@ -1,10 +1,12 @@
-
 [
   {
-    "name": "Team A vs Team B",
-    "group": "Live Sports",
-    "url": "https://example.com/live/stream.m3u8",
-    "start_time": "2026-10-25T18:30:00+06:00",
-    "headers": {}
+    "name": "Snooker Northern Ireland Open",
+    "group": "Pogo Live Sports",
+    "url": "https://dz5.bhalocast.pro:7059/hls/bbtsip4a.m3u8?md5=h8x9bbpAFPUYZ5Wxod0dbw&expires=1792418130&ch=bbtsip4a&s=cafe54cecac623666a52f9753a2c63c8",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://playerdee.top/alpha/snooker-northern-ireland-open/2913",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
   }
 ]
