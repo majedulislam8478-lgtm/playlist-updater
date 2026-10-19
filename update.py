@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+# Logger Setup
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("playlist_json")
 
@@ -25,7 +26,7 @@ session.headers.update(HEADERS)
 
 
 def fetch_event_pages():
-    """Homepage theke protiti event-er link ebong name khunje ber kore."""
+    """হোমপেজ থেকে লাইভ ইভেন্টের লিংক এবং নাম সংগ্রহ করে"""
     try:
         res = session.get(BASE_URL, timeout=15)
         res.raise_for_status()
@@ -36,7 +37,7 @@ def fetch_event_pages():
     soup = BeautifulSoup(res.text, "html.parser")
     events = []
 
-    # Match/Event links selector
+    # ইভেন্ট বা ম্যাচের লিংক খুঁজে বের করার জন্য সিলেক্টর
     for a in soup.select("a[href*='/events/'], .match-item a[href], .card a[href]"):
         href = a.get("href")
         name = a.get_text(" ", strip=True)
@@ -56,30 +57,44 @@ def fetch_event_pages():
 
 
 def extract_stream_info(event_url):
-    """Event page theke player page-e giye direct m3u8 ebong referer extract kore."""
+    """ইভেন্ট পেজ ও প্লেয়ার পেজ থেকে আসল m3u8 লিংক এবং referer বের করে"""
     try:
         res = session.get(event_url, timeout=15)
         soup = BeautifulSoup(res.text, "html.parser")
 
-        # Player ba stream iframe/link khunja
+        # প্লেয়ার বা স্ট্রিম লিংক/আইফ্রেম খোঁজা
         player_links = []
-        for tag in soup.select("a[href*='player'], a[href*='stream'], iframe[src]"):
-            link = tag.get("href") or tag.get("src")
+        for tag in soup.select("a[href*='player'], a[href*='stream'], iframe[src], a.watch-btn, [data-stream]"):
+            link = tag.get("href") or tag.get("src") or tag.get("data-stream")
             if link:
                 player_links.append(urljoin(event_url, link))
 
+        # যদি সরাসরি লিংক না পাওয়া যায়, তবে স্ক্রিপ্ট ট্যাগ থেকে খোঁজা
+        if not player_links:
+            scripts = soup.find_all("script")
+            for script in scripts:
+                if script.string:
+                    found_urls = re.findall(r'(https?://[^\s\'"]+(?:player|stream|embed)[^\s\'"]*)', script.string)
+                    player_links.extend(found_urls)
+
+        # কোনো প্লেয়ার লিংক না পেলে ইভেন্ট পেজ নিজেই ট্রাই করবে
+        if not player_links:
+            player_links.append(event_url)
+
         for player_url in player_links:
-            # Player page fetch kora
-            player_res = session.get(player_url, headers={"Referer": event_url}, timeout=15)
-            player_html = player_res.text
+            try:
+                player_res = session.get(player_url, headers={"Referer": event_url}, timeout=15)
+                player_html = player_res.text
 
-            # Regex diye m3u8 URL khunja
-            m3u8_match = re.search(r'(https?://[^\s\'"]+\.m3u8[^\s\'"]*)', player_html)
+                # Regex দিয়ে .m3u8 URL খুঁজে বের করা
+                m3u8_match = re.search(r'(https?://[^\s\'"]+\.m3u8[^\s\'"]*)', player_html)
 
-            if m3u8_match:
-                m3u8_url = m3u8_match.group(1).replace("\\", "")
-                referer = player_url
-                return m3u8_url, referer
+                if m3u8_match:
+                    m3u8_url = m3u8_match.group(1).replace("\\", "")
+                    referer = player_url
+                    return m3u8_url, referer
+            except Exception:
+                continue
 
     except Exception as exc:
         log.warning("Error parsing stream from %s: %s", event_url, exc)
@@ -95,10 +110,10 @@ def main():
         log.info("Processing event: %s", event["name"])
         m3u8_url, referer = extract_stream_info(event["url"])
 
-        # M3U8 paowa gele JSON-e add hobe, na paowa gele fallback hisebe event URL thakbe
-        stream_url = m3u8_url if m3u8_url else event["url"]
+        # যদি `.m3u8` লিংক না পাওয়া যায়, তবে ফিল্ডটি ফাকা বা ইভেন্ট লিংক রাখতে পারেন
+        stream_url = m3u8_url if m3u8_url else ""
+        
         headers_dict = {}
-
         if referer:
             headers_dict["Referer"] = referer
         else:
@@ -110,13 +125,15 @@ def main():
             "name": event["name"],
             "group": "Pogo Live Sports",
             "url": stream_url,
-            "start_time": "",  # Proyojon onujayi website theke time format Parse kore boshano jabe
+            "start_time": "",
             "headers": headers_dict
         }
 
-        json_data.append(item)
+        # শুধুমাত্র যেগুলোতে আসল m3u8 লিংক পাওয়া যাবে সেগুলো JSON-এ সেव করবে (চাইলে শর্ত সরাতে পারেন)
+        if stream_url:
+            json_data.append(item)
 
-    # JSON File-e save kora
+    # channels.json ফাইলে সেভ করা
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(json_data, f, indent=2, ensure_ascii=False)
 
