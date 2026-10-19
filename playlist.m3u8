@@ -1,4 +1,65 @@
 #EXTM3U
-
-#EXTINF:-1 group-title="Live Sports",[Starts in: 144:35:49] Team A vs Team B
-https://example.com/live/stream.m3u8
+#EXTINF:-1 group-title="Pogo Live",Soccer
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/soccer-streams
+#EXTINF:-1 group-title="Pogo Live",NBA
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/nba-streams
+#EXTINF:-1 group-title="Pogo Live",F1
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/f1-streams
+#EXTINF:-1 group-title="Pogo Live",MotoGp
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/motogp-streams
+#EXTINF:-1 group-title="Pogo Live",UFC
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/ufc-streams-free
+#EXTINF:-1 group-title="Pogo Live",Rugby
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/rugby-streams
+#EXTINF:-1 group-title="Pogo Live",NFL
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/nfl-streams
+#EXTINF:-1 group-title="Pogo Live",Premier League
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/epl-streams
+#EXTINF:-1 group-title="Pogo Live",EFL
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/efl-streams
+#EXTINF:-1 group-title="Pogo Live",LaLiga
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/laliga-streams
+#EXTINF:-1 group-title="Pogo Live",Champions League
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/ucl-streams
+#EXTINF:-1 group-title="Pogo Live",Serie A
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/serie-a-live-stream-free
+#EXTINF:-1 group-title="Pogo Live",Bundesliga
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/bundesliga-streams
+#EXTINF:-1 group-title="Pogo Live",WSL
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/wsl-streams
+#EXTINF:-1 group-title="Pogo Live",Formula 1
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/leagues/formula-1-live-stream
+#EXTINF:-1 group-title="Pogo Live",Liverpool
+#EXTVLCOPT:http-referrer=https://pogo.pk/
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+https://pogo.pk/teams/liverpool
