@@ -1,0 +1,4 @@
+#EXTM3U
+
+#EXTINF:-1 group-title="Live Sports",[Starts in: 144:35:49] Team A vs Team B
+https://example.com/live/stream.m3u8
