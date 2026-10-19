@@ -1,147 +1,188 @@
-from datetime import datetime, timezone, timedelta
-import json
+
+from datetime import timezone, timedelta
 import logging
 import os
-import re
-import sys
 import tempfile
+from urllib.parse import urljoin, urlparse
+
 import requests
 from bs4 import BeautifulSoup
 
 OUTPUT_FILE = "playlist.m3u8"
+BASE_URL = "https://pogo.pk/"
 BD_TZ = timezone(timedelta(hours=6))
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
 )
 log = logging.getLogger("playlist")
 
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,"
-        " like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
     ),
-    "Referer": "https://pogo.pk/",
+    "Referer": BASE_URL,
 }
+
+SESSION = requests.Session()
+SESSION.headers.update(HEADERS)
 
 
 def fetch_pogo_matches():
-  """pogo.pk ওয়েবসাইট থেকে লাইভ ও আপকামিং ম্যাচের তথ্য ফেচ করে"""
-  url = "https://pogo.pk/"
-  try:
-    response = requests.get(url, headers=HEADERS, timeout=15)
-    response.raise_for_status()
-  except requests.RequestException as e:
-    log.error("Failed to fetch pogo.pk: %s", e)
-    return []
+    """Fetch publicly accessible match links from Pogo.pk."""
+    try:
+        response = SESSION.get(BASE_URL, timeout=20)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        log.error("Failed to fetch Pogo.pk: %s", exc)
+        return []
 
-  soup = BeautifulSoup(response.text, "html.parser")
-  channels = []
+    soup = BeautifulSoup(response.text, "html.parser")
+    channels = []
+    seen_urls = set()
 
-  # পোগো ডট পিকে সাইটের গঠন অনুযায়ী ম্যাচ বা স্ট্রিম এলিমেন্টগুলো সংগ্রহ করা
-  # সাধারণত প্রতিটি ম্যাচের একটি টাইটেল এবং স্ট্রিম লিংক বা ডিটেইল পেজ থাকে
-  # এখানে সাইটের স্ট্রাকচার অনুযায়ী ম্যাচ আইটেমগুলো পার্স করা হচ্ছে:
-  for item in soup.select("a[href*='stream'], .match-item, .card, li"):
-    href = item.get("href", "")
-    text = item.get_text(" ", strip=True)
+    selectors = [
+        "a[href*='stream']",
+        "a[href*='match']",
+        "a[href*='live']",
+        ".match-item a[href]",
+        ".card a[href]",
+    ]
 
-    if not href or ("pogo.pk" not in href and not href.startswith("/")):
-      continue
+    links = []
+    for selector in selectors:
+        links.extend(soup.select(selector))
 
-    full_url = href if href.startswith("http") else f"https://pogo.pk{href}"
+    for item in links:
+        href = (item.get("href") or "").strip()
+        name = item.get_text(" ", strip=True)
 
-    # ম্যাচ নেম বা ডিটেইল আলাদা করা
-    if " vs " in text or " - " in text:
-      channels.append({
-          "name": text[:60], 
-          "url": full_url,
-          "group": "Pogo Live",
-          "headers": {"referer": "https://pogo.pk/", "user-agent": HEADERS["User-Agent"]},
-      })
+        if not href or not name:
+            continue
 
-  # যদি সরাসরি লিংক না পাওয়া যায়, তবে ব্যাকআপ হিসেবে কিছু ডিফল্ট স্ট্রিম সোর্স বা পেজ থেকে ডেটা নেওয়া যেতে পারে
-  if not channels:
-    log.warning(
-        "No dynamic matches parsed directly, checking alternative selectors..."
-    )
-    # সাইটের নিজস্ব প্রধান ক্যাটাগরি বা ম্যাচ লিঙ্ক ট্র্যাক করার জন্য
-    for a in soup.find_all("a", href=True):
-      link = a["href"]
-      if "match" in link or "live" in link:
-        full_link = link if link.startswith("http") else f"https://pogo.pk{link}"
-        title = a.get_text(strip=True)
-        if title and len(title) > 3:
-          channels.append({
-              "name": title,
-              "url": full_link,
-              "group": "Pogo Sports",
-              "headers": {
-                  "referer": "https://pogo.pk/",
-                  "user-agent": HEADERS["User-Agent"],
-              },
-          })
+        full_url = urljoin(BASE_URL, href)
+        parsed = urlparse(full_url)
 
-  # ডুপ্লিকেট রিমুভ করা
-  unique_channels = []
-  seen_urls = set()
-  for ch in channels:
-    if ch["url"] not in seen_urls:
-      seen_urls.add(ch["url"])
-      unique_channels.append(ch)
+        if parsed.scheme not in ("http", "https"):
+            continue
 
-  return unique_channels
+        # Only accept links hosted on the expected website.
+        if parsed.hostname not in ("pogo.pk", "www.pogo.pk"):
+            continue
+
+        if full_url in seen_urls:
+            continue
+
+        seen_urls.add(full_url)
+
+        channels.append({
+            "name": name[:100],
+            "url": full_url,
+            "group": "Pogo Live",
+            "headers": {
+                "referer": BASE_URL,
+                "user-agent": HEADERS["User-Agent"],
+            },
+        })
+
+    log.info("Found %d candidate links on Pogo.pk", len(channels))
+    return channels
 
 
-def build_entry(ch):
-  name = str(ch.get("name", "")).strip()
-  url = str(ch.get("url", "")).strip()
-  if not name or not url.startswith(("http://", "https://")):
-    return None
+def build_entry(channel):
+    name = str(channel.get("name", "")).strip()
+    url = str(channel.get("url", "")).strip()
+    group = str(channel.get("group", "Pogo Live")).strip()
 
-  group = ch.get("group", "Pogo Live")
-  headers = {k.lower(): v for k, v in (ch.get("headers") or {}).items()}
+    if not name or not url:
+        return None
 
-  lines = [f'#EXTINF:-1 group-title="{group}",{name}']
-  if "referer" in headers:
-    lines.append(f'#EXTVLCOPT:http-referrer={headers["referer"]}')
-  if "user-agent" in headers:
-    lines.append(f'#EXTVLCOPT:http-user-agent={headers["user-agent"]}')
-  lines.append(url)
-  return "\n".join(lines)
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        log.warning("Skipping invalid URL: %s", url)
+        return None
+
+    # Prevent malformed M3U metadata.
+    name = name.replace("\r", " ").replace("\n", " ").replace(",", " ")
+    group = group.replace('"', "").replace("\r", " ").replace("\n", " ")
+
+    headers = {
+        str(key).lower(): str(value)
+        for key, value in (channel.get("headers") or {}).items()
+    }
+
+    lines = [f'#EXTINF:-1 group-title="{group}",{name}']
+
+    if headers.get("referer"):
+        referer = headers["referer"].replace("\r", "").replace("\n", "")
+        lines.append(f"#EXTVLCOPT:http-referrer={referer}")
+
+    if headers.get("user-agent"):
+        user_agent = headers["user-agent"].replace("\r", "").replace("\n", "")
+        lines.append(f"#EXTVLCOPT:http-user-agent={user_agent}")
+
+    lines.append(url)
+    return "\n".join(lines)
 
 
 def write_atomic(path, content):
-  fd, tmp = tempfile.mkstemp(dir=".", suffix=".tmp")
-  try:
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-      f.write(content)
-    os.replace(tmp, path)
-  except Exception:
-    if os.path.exists(tmp):
-      os.remove(tmp)
-    raise
+    """Write the playlist atomically to avoid partial files."""
+    directory = os.path.dirname(os.path.abspath(path))
+
+    fd, temp_path = tempfile.mkstemp(
+        dir=directory,
+        prefix=".playlist_",
+        suffix=".tmp",
+    )
+
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as file:
+            file.write(content)
+
+        os.replace(temp_path, path)
+
+    except Exception:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        raise
 
 
 def main():
-  raw_channels = fetch_pogo_matches()
-  if not raw_channels:
-    log.error("No channels fetched from pogo.pk.")
-    # ফলব্যাক বা ডিফল্ট এন্ট্রি রাখতে পারেন যদি সাইট থেকে লাইভ ম্যাচ না পাওয়া যায়
-    raw_channels = [{
-        "name": "Pogo.pk Home Stream",
-        "url": "https://pogo.pk/",
-        "group": "Pogo Live",
-        "headers": {
-            "referer": "https://pogo.pk/",
-            "user-agent": HEADERS["User-Agent"],
-        },
-    }]
+    channels = fetch_pogo_matches()
 
-  entries = [e for e in (build_entry(c) for c in raw_channels) if e]
-  content = "#EXTM3U\n\n" + "\n\n".join(entries) + "\n"
-  write_atomic(OUTPUT_FILE, content)
-  log.info("Playlist generated with %d entries from Pogo.pk", len(entries))
+    if not channels:
+        log.error(
+            "No match links found. Existing playlist will not be overwritten."
+        )
+        return
+
+    entries = []
+    for channel in channels:
+        entry = build_entry(channel)
+        if entry:
+            entries.append(entry)
+
+    if not entries:
+        log.error("No valid playlist entries generated.")
+        return
+
+    content = "#EXTM3U\n" + "\n".join(entries) + "\n"
+
+    try:
+        write_atomic(OUTPUT_FILE, content)
+    except OSError as exc:
+        log.error("Failed to write playlist: %s", exc)
+        raise
+
+    log.info(
+        "Playlist generated successfully with %d entries: %s",
+        len(entries),
+        OUTPUT_FILE,
+    )
 
 
 if __name__ == "__main__":
-  main()
+    main()
