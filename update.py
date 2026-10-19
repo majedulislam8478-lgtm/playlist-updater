@@ -53,7 +53,7 @@ def fetch_pogo_matches():
     # ম্যাচ নেম বা ডিটেইল আলাদা করা
     if " vs " in text or " - " in text:
       channels.append({
-          "name": text[:60],  ,
+          "name": text[:60], 
           "url": full_url,
           "group": "Pogo Live",
           "headers": {"referer": "https://pogo.pk/", "user-agent": HEADERS["User-Agent"]},
