@@ -18,6 +18,12 @@ jobs:
         with:
           python-version: '3.11'
 
+      # নতুন এই স্টেপটি যোগ করুন যা প্যাকেজগুলো ইনস্টল করবে
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
       - name: Generate playlist
         run: python update.py
 
