@@ -1,4 +1,4 @@
-name: Update Playlist
+Name: Update Playlist
 
 on:
   schedule:
@@ -17,6 +17,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
 
       - name: Generate playlist
         run: python update.py
