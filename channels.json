@@ -1,0 +1,9 @@
+[
+  {
+    "name": "Team A vs Team B",
+    "group": "Live Sports",
+    "url": "https://example.com/live/stream.m3u8",
+    "start_time": "2026-10-25T18:30:00+06:00",
+    "headers": {}
+  }
+]
