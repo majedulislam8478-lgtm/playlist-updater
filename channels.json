@@ -1,11 +1,141 @@
 [
   {
-    "name": "Snooker Northern Ireland Open",
+    "name": "Snooker Northern Ireland Open Snooker",
     "group": "Pogo Live Sports",
-    "url": "https://dz5.bhalocast.pro:7059/hls/bbtsip4a.m3u8?md5=h8x9bbpAFPUYZ5Wxod0dbw&expires=1792418130&ch=bbtsip4a&s=cafe54cecac623666a52f9753a2c63c8",
+    "url": "https://pogo.pk/events/snooker-northern-ireland-open",
     "start_time": "",
     "headers": {
-      "Referer": "https://playerdee.top/alpha/snooker-northern-ireland-open/2913",
+      "Referer": "https://pogo.pk/events/snooker-northern-ireland-open",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Monza Cagliari",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/monza-vs-cagliari",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/monza-vs-cagliari",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Parma Torino",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/parma-vs-torino",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/parma-vs-torino",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Getafe Rayo Vallecano",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/getafe-vs-rayo-vallecano",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/getafe-vs-rayo-vallecano",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Levante Athletic Club",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/levante-vs-athletic-club",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/levante-vs-athletic-club",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Tottenham Hotspur Coventry City",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/spurs-vs-coventry-city",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/spurs-vs-coventry-city",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Borussia Dortmund Sabah Baku",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/borussia-dortmund-vs-sabah",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/borussia-dortmund-vs-sabah",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Fenerbahçe Slavia Praha",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/fenerbahce-vs-slavia-praha",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/fenerbahce-vs-slavia-praha",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Porto PSV",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/porto-vs-psv",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/porto-vs-psv",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Napoli FK Bodo Glimt",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/napoli-vs-bodo-glimt",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/napoli-vs-bodo-glimt",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "AS Roma Slovan Bratislava",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/roma-vs-slovan-bratislava",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/roma-vs-slovan-bratislava",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "FC Barcelona PSG",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/barcelona-vs-psg",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/barcelona-vs-psg",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Wolverhampton Wanderers Portsmouth",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/wolves-vs-portsmouth",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/wolves-vs-portsmouth",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+  },
+  {
+    "name": "Reading Leyton Orient",
+    "group": "Pogo Live Sports",
+    "url": "https://pogo.pk/events/reading-vs-leyton-orient",
+    "start_time": "",
+    "headers": {
+      "Referer": "https://pogo.pk/events/reading-vs-leyton-orient",
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
   }
